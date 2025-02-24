@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>360° Walkthrough | Yagneshwaran Design Group</title>
+  
+  <!-- Import Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Pannellum for 360° viewer (Using CDN) -->
+  <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+  <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css" />
+  
+  <style>
+    body { 
+      font-family: "Poppins", sans-serif; 
+      margin: 0; 
+      text-align: center; 
+    }
+    /* Header container always under 40px */
+    #header-container {
+      position: relative;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+    /* Title styling – aligned to the left and vertically adjusted */
+    #header-container h2 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: left;
+      transform: translateY(10%);
+    }
+    /* Logo styling – cropped using object-fit and vertically adjusted */
+    #logo {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      transform: translateY(-40%);
+    }
+    /* Container for dynamic apartment/room selection */
+    #selection-container {
+      margin: 10px 0;
+    }
+    .select-btn {
+      margin: 5px;
+      padding: 5px 10px;
+      font-size: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .select-btn:hover { background-color: #218838; }
+    /* 360 Viewer Container */
+    #panorama {
+      width: 100vw;
+      height: 73vh;
+      margin-top: 10px;
+    }
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      #header-container { height: 40px; padding: 0 10px; }
+      #header-container h2 { font-size: 10px; transform: translateY(6px); }
+      #logo { width: 40px; height: 40px; transform: translateY(-20px); }
+      .select-btn { font-size: 9px; padding: 4px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with title and logo -->
+  <div id="header-container">
+    <h2>360° Virtual Walkthrough</h2>
+    <!-- The logo's src will be set dynamically via our fallback function -->
+    <img id="logo" alt="Logo">
+  </div>
+  
+  <!-- Container for apartment and room selection -->
+  <div id="selection-container">
+    <div id="apartment-selection">
+      <!-- Apartment buttons will be inserted here -->
+    </div>
+    <div id="subcategory-selection">
+      <!-- Subcategory buttons (if any) will be inserted here -->
+    </div>
+    <div id="room-selection">
+      <!-- Room buttons will be inserted here -->
+    </div>
+  </div>
+  
+  <!-- 360 Viewer Container -->
+  <div id="panorama"></div>
+  
+  <script>
+    /* -------------------------------------------------------------
+       CONFIGURATION OBJECT
+       You can modify the structure below to add/remove apartments,
+       subcategories, and rooms. Each room object should have:
+         - id: a unique identifier (used as sceneId)
+         - name: the text to display on the button
+         - image: the base name of the panorama image (without extension)
+    ------------------------------------------------------------- */
+    const config = {
+      apartments: {
+        a1: {
+          subcategories: {
+            Living: [
+              { id: "hall", name: "Hall", image: "hall" },
+              { id: "kitchen", name: "Kitchen", image: "kitchen" }
+            ],
+            Bedrooms: [
+              { id: "bedroom", name: "Bedroom", image: "bedroom" }
+            ]
+          }
+        },
+        b1: {
+          subcategories: {
+            Living: [
+              { id: "living", name: "Living Room", image: "living" }
+            ],
+            Bathrooms: [
+              { id: "bathroom", name: "Bathroom", image: "bathroom" }
+            ]
+          }
+        }
+      }
+    };
+    
+    /* -------------------------------------------------------------
+       IMAGE FALLBACK FUNCTIONS
+       loadImageWithFallback() for logo; getImagePath() for panoramas.
+    ------------------------------------------------------------- */
+    
+    // Loads an image with fallback for multiple formats.
+    function loadImageWithFallback(imgElement, baseName, formats) {
+      let index = 0;
+      function tryNext() {
+        if (index >= formats.length) return;
+        imgElement.src = baseName + formats[index];
+        index++;
+      }
+      imgElement.onerror = tryNext;
+      tryNext();
+    }
+    
+    // For panorama images, best-effort attempt (synchronous check is limited).
+    function getImagePath(name) {
+      const formats = ['.jpg', '.jpeg', '.png'];
+      // Return the first format URL; for production, consider a better async solution.
+      return name + formats[0];
+    }
+    
+    // Set logo source using fallback (.jpg, then .jpeg, then .png)
+    loadImageWithFallback(document.getElementById("logo"), "logo", [".jpg", ".jpeg", ".png"]);
+    
+    /* -------------------------------------------------------------
+       DYNAMIC UI GENERATION FUNCTIONS
+    ------------------------------------------------------------- */
+    
+    // Generate apartment selection buttons
+    function generateApartmentButtons() {
+      const container = document.getElementById("apartment-selection");
+      container.innerHTML = "";
+      for (let apt in config.apartments) {
+        let btn = document.createElement("button");
+        btn.className = "select-btn";
+        btn.textContent = apt.toUpperCase();
+        btn.onclick = () => { selectApartment(apt); };
+        container.appendChild(btn);
+      }
+    }
+    
+    // When an apartment is selected, generate subcategory & room buttons
+    let currentApartment = null;
+    function selectApartment(apt) {
+      currentApartment = config.apartments[apt];
+      generateSubcategoryButtons(currentApartment);
+      document.getElementById("room-selection").innerHTML = ""; // Clear room buttons
+    }
+    
+    // Generate subcategory buttons; clicking one displays room buttons
+    function generateSubcategoryButtons(apartmentConfig) {
+      const container = document.getElementById("subcategory-selection");
+      container.innerHTML = "";
+      // If no subcategories, assume a flat structure.
+      if (!apartmentConfig.subcategories) return;
+      for (let subcat in apartmentConfig.subcategories) {
+        let btn = document.createElement("button");
+        btn.className = "select-btn";
+        btn.textContent = subcat;
+        btn.onclick = () => { generateRoomButtons(apartmentConfig.subcategories[subcat]); };
+        container.appendChild(btn);
+      }
+    }
+    
+    // Generate room buttons based on an array of room objects.
+    function generateRoomButtons(rooms) {
+      const container = document.getElementById("room-selection");
+      container.innerHTML = "";
+      rooms.forEach(room => {
+        let btn = document.createElement("button");
+        btn.className = "select-btn";
+        btn.textContent = room.name;
+        btn.onclick = () => { loadScene(room); };
+        container.appendChild(btn);
+      });
+    }
+    
+    /* -------------------------------------------------------------
+       PANORAMA VIEWER SETUP
+    ------------------------------------------------------------- */
+    
+    // Initialize Pannellum viewer (without in-view navigation arrows)
+    let viewer = pannellum.viewer('panorama', {
+      default: {
+        firstScene: null,  // We'll set the scene when a room is selected.
+        autoLoad: true,
+        showZoomCtrl: true,
+        minPitch: -120,
+        maxPitch: 120,
+        minYaw: -180,
+        maxYaw: 180,
+        minHfov: 30,
+        maxHfov: 80
+      },
+      scenes: {
+        // Scenes will be dynamically created when a room is selected.
+      }
+    });
+    
+    // Load a scene for a room object from the configuration.
+    function loadScene(room) {
+      // Create a scene configuration dynamically.
+      let sceneConfig = {
+        type: 'equirectangular',
+        panorama: getImagePath(room.image),
+        hotSpots: []  // No in-view navigation arrows.
+      };
+      // Add the scene to viewer (or update it if it exists)
+      viewer.addScene(room.id, sceneConfig);
+      viewer.loadScene(room.id);
+    }
+    
+    // Initialize apartment buttons on page load.
+    generateApartmentButtons();
+  </script>
+</body>
+</html>
