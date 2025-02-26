@@ -20,23 +20,22 @@
     
     /* ---------------- FINAL INTERFACE ---------------- */
     #finalInterface { display: none; }
+    /* Unit Selection Page updated to be exactly 80px tall and full width */
     #unitSelectionPage {
+      height: 80px;
+      width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
     }
+    /* Each unit button divides the 80px container equally */
     .unit-card {
-      height: 80px;
-      width: 100px;
+      flex: 1;
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
       border: 1px solid #ccc;
       cursor: pointer;
-      background: #f9f9f9;
-      margin: 10px auto;
     }
     #downloadContainer { text-align: center; margin: 20px; }
     #walkthroughPage { display: none; }
@@ -117,7 +116,7 @@
 
   <!-- ================= FINAL INTERFACE ================= -->
   <div id="finalInterface">
-    <!-- Unit Selection Page -->
+    <!-- Unit Selection Page: now occupies a fixed 80px tall area across full width -->
     <div id="unitSelectionPage"></div>
     <div id="downloadContainer">
       <button id="downloadCode">Download Code</button>
@@ -143,7 +142,6 @@
       });
     }
 
-    // Step 1: Choose number of units
     document.getElementById('next1').addEventListener('click', function() {
       const selection = document.getElementById('numUnitsSelect').value;
       numUnits = (selection === "Villa") ? 1 : parseInt(selection);
@@ -163,12 +161,10 @@
       showConfigStep(2);
     });
 
-    // Back button from Step 2 to Step 1
     document.getElementById('back1').addEventListener('click', function() {
       showConfigStep(1);
     });
 
-    // Step 2: Save unit names and proceed
     document.getElementById('next2').addEventListener('click', function() {
       unitNames = [];
       for (let i = 0; i < numUnits; i++) {
@@ -180,12 +176,10 @@
       showConfigStep(3);
     });
 
-    // Back button from Step 3 to Step 2
     document.getElementById('back2').addEventListener('click', function() {
       showConfigStep(2);
     });
 
-    // Step 3: Add bubble entry with unit dropdown
     document.getElementById('addBubble').addEventListener('click', function() {
       addBubbleEntry();
     });
@@ -217,7 +211,6 @@
       container.appendChild(entryDiv);
     }
 
-    // Finish Setup: Collect bubble entries and generate final interface
     document.getElementById('finish').addEventListener('click', function() {
       bubbleData = [];
       document.querySelectorAll('.bubble-entry').forEach(entry => {
@@ -314,7 +307,7 @@
       return label.toLowerCase().replace(/\s+/g, '');
     }
     
-    // Back button on final (walkthrough) page
+    // Back button on walkthrough page returns to unit selection page
     document.getElementById('backButton').addEventListener('click', function() {
       document.getElementById('walkthroughPage').style.display = 'none';
       document.getElementById('unitSelectionPage').style.display = 'block';
