@@ -8,45 +8,18 @@
   <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
   <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
   <style>
-    body { 
-      font-family: "Poppins", sans-serif; 
-      margin: 0; 
-      padding: 0; 
-    }
+    body { font-family: "Poppins", sans-serif; margin: 0; padding: 0; }
     
     /* ---------------- CONFIGURATION FORM ---------------- */
-    #configForm {
-      padding: 20px;
-    }
-    #configForm .step {
-      display: none;
-    }
-    #configForm .step.active {
-      display: block;
-    }
-    input, select, textarea {
-      width: 100%; 
-      padding: 8px; 
-      margin-top: 5px;
-    }
-    button {
-      padding: 10px; 
-      cursor: pointer; 
-      background: #007bff; 
-      color: #fff; 
-      border: none; 
-      border-radius: 5px;
-      margin: 10px;  /* Added margin to separate buttons */
-    }
-    .back-btn { 
-      background: #888; 
-      margin-right: 10px; 
-    }
+    #configForm { padding: 20px; }
+    #configForm .step { display: none; }
+    #configForm .step.active { display: block; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    button { padding: 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 5px; margin: 10px; }
+    .back-btn { background: #888; margin-right: 10px; }
     
     /* ---------------- FINAL INTERFACE ---------------- */
-    #finalInterface {
-      display: none;
-    }
+    #finalInterface { display: none; }
     #unitSelectionPage {
       display: flex;
       flex-direction: column;
@@ -56,7 +29,7 @@
     }
     .unit-card {
       height: 80px;
-      width: 100px;  /* Fixed width of 100px */
+      width: 100px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -65,32 +38,14 @@
       background: #f9f9f9;
       margin: 10px auto;
     }
-    #downloadContainer {
-      text-align: center;
-      margin: 20px;
-    }
-    #walkthroughPage {
-      display: none;
-    }
-    #backButton {
-      background: #888; 
-      color: #fff; 
-      border: none; 
-      border-radius: 5px; 
-      padding: 5px 10px;
-      margin: 10px;
-    }
-    #panorama {
-      width: 100vw;
-      height: 80vh;
-      margin-top: 10px;
-    }
-    /* Additional styles for Pannellum bubble navigation */
+    #downloadContainer { text-align: center; margin: 20px; }
+    #walkthroughPage { display: none; }
+    #backButton { background: #888; color: #fff; border: none; border-radius: 5px; padding: 5px 10px; margin: 10px; }
+    #panorama { width: 100vw; height: 80vh; margin-top: 10px; }
+    /* Pannellum bubble navigation */
     #bubble-container {
       position: fixed;
-      bottom: 20px;
-      left: 0;
-      right: 0;
+      bottom: 20px; left: 0; right: 0;
       display: flex;
       justify-content: space-evenly;
       align-items: center;
@@ -103,16 +58,14 @@
       cursor: pointer;
     }
     .bubble {
-      width: 60px;
-      height: 60px;
+      width: 60px; height: 60px;
       border-radius: 50%;
       overflow: hidden;
       border: 2px solid #007bff;
       background: #fff;
     }
     .bubble img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
       animation: bubblePan 6s linear infinite alternate-reverse;
     }
@@ -120,18 +73,14 @@
       0% { transform: scale(1.8) translateX(0%); }
       100% { transform: scale(1.8) translateX(44%); }
     }
-    .bubble-label {
-      margin-top: 5px;
-      font-weight: 700;
-      font-size: 10px;
-      color: #333;
-    }
+    .bubble-label { margin-top: 5px; font-weight: 700; font-size: 10px; color: #333; }
   </style>
 </head>
 <body>
 
   <!-- ================= CONFIGURATION FORM ================= -->
   <div id="configForm">
+    <!-- Step 1: Choose number of units -->
     <div id="configStep1" class="step active">
       <h2>Step 1: Choose Number of Units</h2>
       <select id="numUnitsSelect">
@@ -147,6 +96,7 @@
       <button id="next1">Next</button>
     </div>
     
+    <!-- Step 2: Name the units -->
     <div id="configStep2" class="step">
       <h2>Step 2: Name Your Units</h2>
       <div id="unitNamesContainer"></div>
@@ -154,6 +104,7 @@
       <button id="next2">Next</button>
     </div>
     
+    <!-- Step 3: Setup 360° Bubble Details -->
     <div id="configStep3" class="step">
       <h2>Step 3: Setup 360° Bubble Details</h2>
       <div id="bubbleEntriesContainer"></div>
@@ -166,11 +117,13 @@
 
   <!-- ================= FINAL INTERFACE ================= -->
   <div id="finalInterface">
+    <!-- Unit Selection Page -->
     <div id="unitSelectionPage"></div>
     <div id="downloadContainer">
       <button id="downloadCode">Download Code</button>
     </div>
     
+    <!-- Walkthrough Page -->
     <div id="walkthroughPage">
       <button id="backButton">Back</button>
       <div id="panorama"></div>
@@ -190,6 +143,7 @@
       });
     }
 
+    // Step 1: Choose number of units
     document.getElementById('next1').addEventListener('click', function() {
       const selection = document.getElementById('numUnitsSelect').value;
       numUnits = (selection === "Villa") ? 1 : parseInt(selection);
@@ -209,24 +163,29 @@
       showConfigStep(2);
     });
 
+    // Back button from Step 2 to Step 1
     document.getElementById('back1').addEventListener('click', function() {
       showConfigStep(1);
     });
 
+    // Step 2: Save unit names and proceed
     document.getElementById('next2').addEventListener('click', function() {
       unitNames = [];
       for (let i = 0; i < numUnits; i++) {
         unitNames.push(document.getElementById(`unitName${i}`).value.trim());
       }
+      // Clear previous bubble entries and add one default
       document.getElementById('bubbleEntriesContainer').innerHTML = '';
       addBubbleEntry();
       showConfigStep(3);
     });
 
+    // Back button from Step 3 to Step 2
     document.getElementById('back2').addEventListener('click', function() {
       showConfigStep(2);
     });
 
+    // Step 3: Add bubble entry with dropdown for unit selection
     document.getElementById('addBubble').addEventListener('click', function() {
       addBubbleEntry();
     });
@@ -244,18 +203,32 @@
       fileInput.type = 'text';
       fileInput.placeholder = '360 Image File Name';
       
+      const unitSelect = document.createElement('select');
+      unitNames.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        unitSelect.appendChild(option);
+      });
+      
       entryDiv.appendChild(roomInput);
       entryDiv.appendChild(fileInput);
+      entryDiv.appendChild(unitSelect);
       container.appendChild(entryDiv);
     }
 
+    // Finish Setup: Collect bubble entries and generate final interface
     document.getElementById('finish').addEventListener('click', function() {
       bubbleData = [];
       document.querySelectorAll('.bubble-entry').forEach(entry => {
-        bubbleData.push({
-          roomLabel: entry.children[0].value.trim(),
-          imageFileName: entry.children[1].value.trim()
-        });
+        const roomName = entry.children[0].value.trim();
+        const imageFileName = entry.children[1].value.trim();
+        const selectedUnit = entry.children[2].value.trim();
+        if (!roomName || !imageFileName || !selectedUnit) {
+          alert("Please complete all bubble entries.");
+          return;
+        }
+        bubbleData.push({ roomLabel: roomName, imageFileName: imageFileName, unit: selectedUnit });
       });
       generateFinalInterface();
     });
