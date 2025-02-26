@@ -20,14 +20,14 @@
     
     /* ---------------- FINAL INTERFACE ---------------- */
     #finalInterface { display: none; }
-    /* Unit Selection Page updated to be exactly 80px tall and full width */
+    /* Unit Selection Page: occupies a fixed 80px tall area, full width */
     #unitSelectionPage {
       height: 600px;
       width: 100%;
       display: flex;
       flex-direction: column;
     }
-    /* Each unit button divides the 80px container equally */
+    /* Each unit button divides the container equally */
     .unit-card {
       flex: 1;
       width: 100%;
@@ -70,7 +70,7 @@
     }
     @keyframes bubblePan {
       0% { transform: scale(1.8) translateX(0%); }
-      100% { transform: scale(1.8) translateX(44%); }
+      100% { transform: scale(1.8) translateX(20%); }
     }
     .bubble-label { margin-top: 5px; font-weight: 700; font-size: 10px; color: #333; }
   </style>
@@ -116,7 +116,7 @@
 
   <!-- ================= FINAL INTERFACE ================= -->
   <div id="finalInterface">
-    <!-- Unit Selection Page: now occupies a fixed 80px tall area across full width -->
+    <!-- Unit Selection Page -->
     <div id="unitSelectionPage"></div>
     <div id="downloadContainer">
       <button id="downloadCode">Download Code</button>
@@ -134,6 +134,25 @@
     let numUnits;
     let unitNames = [];
     let bubbleData = []; // Each object: { roomLabel, imageFileName, unit }
+
+    /* Helper: Accepts a base image name and tests common extensions */
+    async function getCompatibleImageURL(baseName, formats = ['.jpg', '.jpeg', '.png', '.gif', '.webp']) {
+      for (const ext of formats) {
+        const url = baseName + ext;
+        try {
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = url;
+          });
+          return url;
+        } catch (error) {
+          // Try next extension
+        }
+      }
+      return null; // No valid image found
+    }
 
     /* ---------------- CONFIGURATION FORM LOGIC ---------------- */
     function showConfigStep(stepNumber) {
@@ -170,7 +189,6 @@
       for (let i = 0; i < numUnits; i++) {
         unitNames.push(document.getElementById(`unitName${i}`).value.trim());
       }
-      // Clear previous bubble entries and add one default
       document.getElementById('bubbleEntriesContainer').innerHTML = '';
       addBubbleEntry();
       showConfigStep(3);
@@ -235,8 +253,8 @@
         const card = document.createElement('div');
         card.className = 'unit-card';
         card.textContent = unit;
-        card.addEventListener('click', function() {
-          loadWalkthroughForUnit(unit);
+        card.addEventListener('click', async function() {
+          await loadWalkthroughForUnit(unit);
         });
         unitSelectionPage.appendChild(card);
       });
@@ -253,28 +271,33 @@
       URL.revokeObjectURL(url);
     });
 
-    function loadWalkthroughForUnit(selectedUnit) {
+    async function loadWalkthroughForUnit(selectedUnit) {
       document.getElementById('unitSelectionPage').style.display = 'none';
       document.getElementById('walkthroughPage').style.display = 'block';
       
-      // Build scenes object from bubbleData for the selected unit
       let scenes = {};
       let bubbleHTML = '';
       const unitBubbles = bubbleData.filter(b => b.unit === selectedUnit);
       const firstSceneId = unitBubbles.length > 0 ? sanitizeSceneId(unitBubbles[0].roomLabel) : null;
       
-      unitBubbles.forEach(bubble => {
-        let sceneId = sanitizeSceneId(bubble.roomLabel);
+      // Loop through each bubble and await a valid URL for its image
+      for (const bubble of unitBubbles) {
+        const sceneId = sanitizeSceneId(bubble.roomLabel);
+        const panoramaURL = await getCompatibleImageURL(bubble.imageFileName);
+        if (!panoramaURL) {
+          alert(`Failed to load image for ${bubble.roomLabel}`);
+          continue;
+        }
         scenes[sceneId] = {
           type: 'equirectangular',
-          panorama: bubble.imageFileName + '.jpg',
+          panorama: panoramaURL,
           hotSpots: []
         };
         bubbleHTML += `<div class="bubble-item" data-scene="${sceneId}">
-                         <div class="bubble"><img alt="${bubble.roomLabel} Preview" src="${bubble.imageFileName + '.jpg'}"></div>
+                         <div class="bubble"><img alt="${bubble.roomLabel} Preview" src="${panoramaURL}"></div>
                          <div class="bubble-label">${bubble.roomLabel}</div>
                        </div>`;
-      });
+      }
       
       document.getElementById('bubble-container').innerHTML = bubbleHTML;
       
@@ -310,7 +333,7 @@
     // Back button on walkthrough page returns to unit selection page
     document.getElementById('backButton').addEventListener('click', function() {
       document.getElementById('walkthroughPage').style.display = 'none';
-      document.getElementById('unitSelectionPage').style.display = 'block';
+      document.getElementById('unitSelectionPage').style.display = 'flex';
     });
   </script>
 </body>
