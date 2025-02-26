@@ -185,7 +185,7 @@
       showConfigStep(2);
     });
 
-    // Step 3: Add bubble entry with dropdown for unit selection
+    // Step 3: Add bubble entry with unit dropdown
     document.getElementById('addBubble').addEventListener('click', function() {
       addBubbleEntry();
     });
@@ -313,6 +313,12 @@
     function sanitizeSceneId(label) {
       return label.toLowerCase().replace(/\s+/g, '');
     }
+    
+    // Back button on final (walkthrough) page
+    document.getElementById('backButton').addEventListener('click', function() {
+      document.getElementById('walkthroughPage').style.display = 'none';
+      document.getElementById('unitSelectionPage').style.display = 'block';
+    });
   </script>
 </body>
 </html>
