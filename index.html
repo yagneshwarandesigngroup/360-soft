@@ -42,10 +42,18 @@
 </head>
 <body>
 
-  <!-- Step 1: Enter number of units -->
+  <!-- Step 1: Choose number of units -->
   <div id="step1" class="step active">
-    <h2>Step 1: Number of Units</h2>
-    <input type="number" id="numUnits" min="1" placeholder="Enter number of units" />
+    <h2>Step 1: Choose Number of Units</h2>
+    <select id="numUnitsSelect">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="Villa">Villa</option>
+    </select>
     <br>
     <button id="next1">Next</button>
   </div>
@@ -80,11 +88,13 @@
 
     // Step 1: Handle the Next button.
     document.getElementById('next1').addEventListener('click', function() {
-      numUnits = parseInt(document.getElementById('numUnits').value);
-      if (!numUnits || numUnits < 1) {
-        alert('Please enter a valid number of units.');
-        return;
+      const selection = document.getElementById('numUnitsSelect').value;
+      if (selection === "Villa") {
+        numUnits = 1;
+      } else {
+        numUnits = parseInt(selection);
       }
+      // Create input fields for unit names.
       const container = document.getElementById('unitNamesContainer');
       container.innerHTML = ''; // Clear any previous inputs.
       for (let i = 0; i < numUnits; i++) {
@@ -92,7 +102,11 @@
         label.textContent = `Unit ${i + 1} Name:`;
         const input = document.createElement('input');
         input.type = 'text';
-        input.placeholder = `Enter name for Unit ${i + 1}`;
+        // If Villa was selected, default the unit name to "Villa"
+        input.placeholder = (selection === "Villa") ? "Villa" : `Enter name for Unit ${i + 1}`;
+        if (selection === "Villa") {
+          input.value = "Villa";
+        }
         input.id = `unitName${i}`;
         container.appendChild(label);
         container.appendChild(input);
