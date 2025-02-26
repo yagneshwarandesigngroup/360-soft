@@ -8,25 +8,129 @@
   <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
   <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
   <style>
-    body { font-family: "Poppins", sans-serif; margin: 0; padding: 0; }
-    #configForm { padding: 20px; }
-    #configForm .step { display: none; }
-    #configForm .step.active { display: block; }
-    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    button { padding: 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 5px; }
-    .back-btn { background: #888; margin-right: 10px; }
-    #finalInterface { display: none; }
-    #unitSelectionPage { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; }
-    .unit-card { height: 80px; width: 100px; display: flex; justify-content: center; align-items: center; border: 1px solid #ccc; cursor: pointer; background: #f9f9f9; }
-    #downloadContainer { text-align: center; margin: 20px; }
-    #walkthroughPage { display: none; }
-    #backButton { background: #888; color: #fff; border: none; border-radius: 5px; padding: 5px 10px; }
-    #panorama { width: 100vw; height: 80vh; margin-top: 10px; }
+    body { 
+      font-family: "Poppins", sans-serif; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    /* ---------------- CONFIGURATION FORM ---------------- */
+    #configForm {
+      padding: 20px;
+    }
+    #configForm .step {
+      display: none;
+    }
+    #configForm .step.active {
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%; 
+      padding: 8px; 
+      margin-top: 5px;
+    }
+    button {
+      padding: 10px; 
+      cursor: pointer; 
+      background: #007bff; 
+      color: #fff; 
+      border: none; 
+      border-radius: 5px;
+      margin: 10px;  /* Added margin to separate buttons */
+    }
+    .back-btn { 
+      background: #888; 
+      margin-right: 10px; 
+    }
+    
+    /* ---------------- FINAL INTERFACE ---------------- */
+    #finalInterface {
+      display: none;
+    }
+    #unitSelectionPage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+    }
+    .unit-card {
+      height: 80px;
+      width: 100px;  /* Fixed width of 100px */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background: #f9f9f9;
+      margin: 10px auto;
+    }
+    #downloadContainer {
+      text-align: center;
+      margin: 20px;
+    }
+    #walkthroughPage {
+      display: none;
+    }
+    #backButton {
+      background: #888; 
+      color: #fff; 
+      border: none; 
+      border-radius: 5px; 
+      padding: 5px 10px;
+      margin: 10px;
+    }
+    #panorama {
+      width: 100vw;
+      height: 80vh;
+      margin-top: 10px;
+    }
+    /* Additional styles for Pannellum bubble navigation */
+    #bubble-container {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      z-index: 150;
+    }
+    .bubble-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .bubble {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #007bff;
+      background: #fff;
+    }
+    .bubble img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      animation: bubblePan 6s linear infinite alternate-reverse;
+    }
+    @keyframes bubblePan {
+      0% { transform: scale(1.8) translateX(0%); }
+      100% { transform: scale(1.8) translateX(44%); }
+    }
+    .bubble-label {
+      margin-top: 5px;
+      font-weight: 700;
+      font-size: 10px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Configuration Form -->
+  <!-- ================= CONFIGURATION FORM ================= -->
   <div id="configForm">
     <div id="configStep1" class="step active">
       <h2>Step 1: Choose Number of Units</h2>
@@ -36,19 +140,20 @@
         <option value="3">3</option>
         <option value="4">4</option>
         <option value="5">5</option>
+        <option value="6">6</option>
         <option value="Villa">Villa</option>
       </select>
       <br>
       <button id="next1">Next</button>
     </div>
-
+    
     <div id="configStep2" class="step">
       <h2>Step 2: Name Your Units</h2>
       <div id="unitNamesContainer"></div>
       <button class="back-btn" id="back1">Back</button>
       <button id="next2">Next</button>
     </div>
-
+    
     <div id="configStep3" class="step">
       <h2>Step 3: Setup 360° Bubble Details</h2>
       <div id="bubbleEntriesContainer"></div>
@@ -59,35 +164,26 @@
     </div>
   </div>
 
-  <!-- Final Interface -->
+  <!-- ================= FINAL INTERFACE ================= -->
   <div id="finalInterface">
     <div id="unitSelectionPage"></div>
     <div id="downloadContainer">
       <button id="downloadCode">Download Code</button>
     </div>
+    
     <div id="walkthroughPage">
       <button id="backButton">Back</button>
       <div id="panorama"></div>
+      <div id="bubble-container"></div>
     </div>
   </div>
 
   <script>
     let numUnits;
     let unitNames = [];
-    let bubbleData = [];
+    let bubbleData = []; // Each object: { roomLabel, imageFileName, unit }
 
-    function saveToStorage() {
-      localStorage.setItem("numUnits", numUnits);
-      localStorage.setItem("unitNames", JSON.stringify(unitNames));
-      localStorage.setItem("bubbleData", JSON.stringify(bubbleData));
-    }
-
-    function loadFromStorage() {
-      numUnits = localStorage.getItem("numUnits") || null;
-      unitNames = JSON.parse(localStorage.getItem("unitNames")) || [];
-      bubbleData = JSON.parse(localStorage.getItem("bubbleData")) || [];
-    }
-
+    /* ---------------- CONFIGURATION FORM LOGIC ---------------- */
     function showConfigStep(stepNumber) {
       document.querySelectorAll('#configForm .step').forEach((step, index) => {
         step.classList.toggle('active', index === stepNumber - 1);
@@ -104,12 +200,12 @@
         label.textContent = `Unit ${i + 1} Name:`;
         const input = document.createElement('input');
         input.type = 'text';
-        input.value = unitNames[i] || (selection === "Villa" ? "Villa" : "");
+        input.placeholder = (selection === "Villa") ? "Villa" : `Enter name for Unit ${i + 1}`;
+        if (selection === "Villa") input.value = "Villa";
         input.id = `unitName${i}`;
         container.appendChild(label);
         container.appendChild(input);
       }
-      saveToStorage();
       showConfigStep(2);
     });
 
@@ -124,7 +220,6 @@
       }
       document.getElementById('bubbleEntriesContainer').innerHTML = '';
       addBubbleEntry();
-      saveToStorage();
       showConfigStep(3);
     });
 
@@ -135,12 +230,12 @@
     document.getElementById('addBubble').addEventListener('click', function() {
       addBubbleEntry();
     });
-
+    
     function addBubbleEntry() {
       const container = document.getElementById('bubbleEntriesContainer');
       const entryDiv = document.createElement('div');
       entryDiv.className = 'bubble-entry';
-
+      
       const roomInput = document.createElement('input');
       roomInput.type = 'text';
       roomInput.placeholder = 'Room Name (Bubble Label)';
@@ -162,7 +257,6 @@
           imageFileName: entry.children[1].value.trim()
         });
       });
-      saveToStorage();
       generateFinalInterface();
     });
 
@@ -175,6 +269,9 @@
         const card = document.createElement('div');
         card.className = 'unit-card';
         card.textContent = unit;
+        card.addEventListener('click', function() {
+          loadWalkthroughForUnit(unit);
+        });
         unitSelectionPage.appendChild(card);
       });
     }
@@ -190,8 +287,59 @@
       URL.revokeObjectURL(url);
     });
 
-    loadFromStorage();
+    function loadWalkthroughForUnit(selectedUnit) {
+      document.getElementById('unitSelectionPage').style.display = 'none';
+      document.getElementById('walkthroughPage').style.display = 'block';
+      
+      // Build scenes object from bubbleData for the selected unit
+      let scenes = {};
+      let bubbleHTML = '';
+      const unitBubbles = bubbleData.filter(b => b.unit === selectedUnit);
+      const firstSceneId = unitBubbles.length > 0 ? sanitizeSceneId(unitBubbles[0].roomLabel) : null;
+      
+      unitBubbles.forEach(bubble => {
+        let sceneId = sanitizeSceneId(bubble.roomLabel);
+        scenes[sceneId] = {
+          type: 'equirectangular',
+          panorama: bubble.imageFileName + '.jpg',
+          hotSpots: []
+        };
+        bubbleHTML += `<div class="bubble-item" data-scene="${sceneId}">
+                         <div class="bubble"><img alt="${bubble.roomLabel} Preview" src="${bubble.imageFileName + '.jpg'}"></div>
+                         <div class="bubble-label">${bubble.roomLabel}</div>
+                       </div>`;
+      });
+      
+      document.getElementById('bubble-container').innerHTML = bubbleHTML;
+      
+      pannellum.viewer('panorama', {
+        default: {
+          firstScene: firstSceneId,
+          autoLoad: true,
+          showZoomCtrl: true,
+          minPitch: -120,
+          maxPitch: 120,
+          minYaw: -180,
+          maxYaw: 180,
+          minHfov: 30,
+          maxHfov: 80
+        },
+        scenes: scenes
+      });
+      
+      document.querySelectorAll('.bubble-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const sceneId = this.getAttribute('data-scene');
+          if (window.viewer) {
+            window.viewer.loadScene(sceneId);
+          }
+        });
+      });
+    }
+    
+    function sanitizeSceneId(label) {
+      return label.toLowerCase().replace(/\s+/g, '');
+    }
   </script>
-
 </body>
 </html>
