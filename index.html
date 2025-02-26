@@ -5,13 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>360° Custom Software Setup</title>
   <style>
-    body { font-family: "Poppins", sans-serif; padding: 20px; }
-    .step { display: none; }
-    .step.active { display: block; }
-    .bubble-entry { margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    button { padding: 10px 15px; margin-top: 10px; cursor: pointer; }
-    #addBubble { background-color: #007bff; color: #fff; border: none; border-radius: 5px; }
+    body { 
+      font-family: "Poppins", sans-serif; 
+      padding: 20px; 
+    }
+    .step { 
+      display: none; 
+    }
+    .step.active { 
+      display: block; 
+    }
+    .bubble-entry { 
+      margin-bottom: 15px; 
+      padding: 10px; 
+      border: 1px solid #ccc; 
+      border-radius: 5px; 
+    }
+    input, textarea, select { 
+      width: 100%; 
+      padding: 8px; 
+      margin-top: 5px; 
+      box-sizing: border-box;
+    }
+    button { 
+      padding: 10px 15px; 
+      margin-top: 10px; 
+      cursor: pointer; 
+    }
+    #addBubble { 
+      background-color: #007bff; 
+      color: #fff; 
+      border: none; 
+      border-radius: 5px; 
+    }
   </style>
 </head>
 <body>
@@ -34,7 +60,7 @@
   <!-- Step 3: Setup 360° Bubble Details -->
   <div id="step3" class="step">
     <h2>Step 3: Setup 360° Bubble Details</h2>
-    <p>For each bubble, enter the room name (the label that the bubble shows) and the 360 image file name (as uploaded to GitHub).</p>
+    <p>For each bubble, enter the room name (the bubble label), the 360 image file name (as uploaded to GitHub), and select the unit it belongs to.</p>
     <div id="bubbleEntriesContainer"></div>
     <button id="addBubble">+ Add Bubble</button>
     <br>
@@ -60,7 +86,7 @@
         return;
       }
       const container = document.getElementById('unitNamesContainer');
-      container.innerHTML = '';
+      container.innerHTML = ''; // Clear any previous inputs.
       for (let i = 0; i < numUnits; i++) {
         const label = document.createElement('label');
         label.textContent = `Unit ${i + 1} Name:`;
@@ -88,55 +114,74 @@
       showStep(3);
     });
 
-    // Function to add a new bubble entry with two text fields.
+    // Function to add a new bubble entry with room name, file name, and unit selection.
     function addBubbleEntry() {
       const container = document.getElementById('bubbleEntriesContainer');
       const entryDiv = document.createElement('div');
       entryDiv.className = 'bubble-entry';
 
-      // Text input for the room name (bubble label).
+      // Text input for room name (bubble label).
       const roomLabel = document.createElement('label');
       roomLabel.textContent = "Room Name (Bubble Label):";
       const roomInput = document.createElement('input');
       roomInput.type = 'text';
       roomInput.placeholder = 'e.g., Living Room';
 
-      // Text input for the image file name.
+      // Text input for the 360 image file name.
       const fileLabel = document.createElement('label');
       fileLabel.textContent = "360 Image File Name:";
       const fileInput = document.createElement('input');
       fileInput.type = 'text';
       fileInput.placeholder = 'e.g., hall';
 
+      // Dropdown for selecting the unit.
+      const unitLabel = document.createElement('label');
+      unitLabel.textContent = "Select Unit:";
+      const unitSelect = document.createElement('select');
+      unitNames.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        unitSelect.appendChild(option);
+      });
+
+      // Append all elements to the bubble entry container.
       entryDiv.appendChild(roomLabel);
       entryDiv.appendChild(roomInput);
       entryDiv.appendChild(fileLabel);
       entryDiv.appendChild(fileInput);
+      entryDiv.appendChild(unitLabel);
+      entryDiv.appendChild(unitSelect);
 
       container.appendChild(entryDiv);
     }
 
-    // Add Bubble button handler.
+    // Handler for the "Add Bubble" button.
     document.getElementById('addBubble').addEventListener('click', addBubbleEntry);
 
-    // Finish button handler – logs the collected data.
+    // Handler for the "Finish Setup" button – logs the collected data.
     document.getElementById('finish').addEventListener('click', function() {
       const bubbleData = [];
       const entries = document.querySelectorAll('.bubble-entry');
+      let complete = true;
       entries.forEach(entry => {
-        // Retrieve both text inputs; first for room label, second for file name.
         const inputs = entry.querySelectorAll('input[type="text"]');
         const roomName = inputs[0].value.trim();
         const imageFileName = inputs[1].value.trim();
-        if (!roomName || !imageFileName) {
+        const unitSelect = entry.querySelector('select');
+        const selectedUnit = unitSelect.value;
+        if (!roomName || !imageFileName || !selectedUnit) {
           alert('Please complete all bubble entries.');
+          complete = false;
           return;
         }
         bubbleData.push({
           roomLabel: roomName,
-          imageFileName: imageFileName
+          imageFileName: imageFileName,
+          unit: selectedUnit
         });
       });
+      if (!complete) return;
       console.log('Unit Names:', unitNames);
       console.log('Bubble Data:', bubbleData);
       alert('Setup finished! Check the console for output.');
