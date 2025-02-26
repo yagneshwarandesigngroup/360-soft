@@ -4,181 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>360° Virtual Walkthrough Builder</title>
-  <!-- Import Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <!-- Pannellum for 360° viewer (Using CDN) -->
   <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css">
   <script src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
   <style>
-    /* Global Styles */
-    body {
-      font-family: "Poppins", sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    
-    /* ---------------- CONFIGURATION FORM ---------------- */
-    #configForm {
-      padding: 20px;
-    }
-    #configForm .step {
-      display: none;
-    }
-    #configForm .step.active {
-      display: block;
-    }
-    .bubble-entry {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      box-sizing: border-box;
-    }
-    button {
-      padding: 10px 15px;
-      margin-top: 10px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-    }
-    
-    /* ---------------- FINAL INTERFACE ---------------- */
-    #finalInterface {
-      display: none;
-    }
-    /* Unit Selection Page */
-    #unitSelectionPage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-    }
-    .unit-card {
-      height: 80px;
-      width: 100px;  /* Fixed width of 100px */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2em;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      border-radius: 5px;
-      background: #f9f9f9;
-      margin: 10px auto; /* Centers the card horizontally */
-    }
-    /* Download Code Button Container */
-    #downloadContainer {
-      text-align: center;
-      margin: 20px;
-    }
-    /* Walkthrough Page */
-    #walkthroughPage {
-      display: none;
-    }
-    #loading-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-    }
-    #loading-logo {
-      width: 150px;
-      height: 75px;
-      object-fit: cover;
-      margin-bottom: 20px;
-    }
-    #loading-text {
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
-    }
-    #header-container {
-      position: relative;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-    }
-    #header-container h2 {
-      margin: 0;
-      font-weight: 600;
-      font-size: 12px;
-      flex-grow: 1;
-      text-align: left;
-    }
-    #backButton {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 5px 10px;
-    }
-    #panorama {
-      width: 100vw;
-      height: 80vh;
-      margin-top: 10px;
-    }
-    #bubble-container {
-      position: fixed;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      z-index: 150;
-    }
-    .bubble-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-    }
-    .bubble {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid #007bff;
-      background: #fff;
-    }
-    .bubble img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      animation: bubblePan 6s linear infinite alternate-reverse;
-    }
-    @keyframes bubblePan {
-      0% { transform: scale(1.8) translateX(0%); }
-      100% { transform: scale(1.8) translateX(44%); }
-    }
-    .bubble-label {
-      margin-top: 5px;
-      font-weight: 700;
-      font-size: 10px;
-      color: #333;
-    }
+    body { font-family: "Poppins", sans-serif; margin: 0; padding: 0; }
+    #configForm { padding: 20px; }
+    #configForm .step { display: none; }
+    #configForm .step.active { display: block; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    button { padding: 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 5px; }
+    .back-btn { background: #888; margin-right: 10px; }
+    #finalInterface { display: none; }
+    #unitSelectionPage { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; }
+    .unit-card { height: 80px; width: 100px; display: flex; justify-content: center; align-items: center; border: 1px solid #ccc; cursor: pointer; background: #f9f9f9; }
+    #downloadContainer { text-align: center; margin: 20px; }
+    #walkthroughPage { display: none; }
+    #backButton { background: #888; color: #fff; border: none; border-radius: 5px; padding: 5px 10px; }
+    #panorama { width: 100vw; height: 80vh; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- ================= CONFIGURATION FORM ================= -->
+  <!-- Configuration Form -->
   <div id="configForm">
-    <!-- Step 1: Choose number of units -->
     <div id="configStep1" class="step active">
       <h2>Step 1: Choose Number of Units</h2>
       <select id="numUnitsSelect">
@@ -187,66 +36,64 @@
         <option value="3">3</option>
         <option value="4">4</option>
         <option value="5">5</option>
-        <option value="6">6</option>
         <option value="Villa">Villa</option>
       </select>
       <br>
       <button id="next1">Next</button>
     </div>
-    
-    <!-- Step 2: Name the units -->
+
     <div id="configStep2" class="step">
       <h2>Step 2: Name Your Units</h2>
       <div id="unitNamesContainer"></div>
+      <button class="back-btn" id="back1">Back</button>
       <button id="next2">Next</button>
     </div>
-    
-    <!-- Step 3: Setup 360° Bubble Details -->
+
     <div id="configStep3" class="step">
       <h2>Step 3: Setup 360° Bubble Details</h2>
       <div id="bubbleEntriesContainer"></div>
       <button id="addBubble">+ Add Bubble</button>
       <br>
+      <button class="back-btn" id="back2">Back</button>
       <button id="finish">Finish Setup</button>
     </div>
   </div>
 
-  <!-- ================= FINAL INTERFACE ================= -->
+  <!-- Final Interface -->
   <div id="finalInterface">
-    <!-- Unit Selection Page -->
     <div id="unitSelectionPage"></div>
     <div id="downloadContainer">
       <button id="downloadCode">Download Code</button>
     </div>
-    
-    <!-- Walkthrough Page -->
     <div id="walkthroughPage">
-      <div id="loading-screen">
-        <img id="loading-logo" alt="Logo" src="logo.jpg">
-        <div id="loading-text">Your 360° Virtual Walkthrough is setting up...</div>
-      </div>
-      <div id="header-container">
-        <button id="backButton">Back</button>
-        <h2 id="unitTitle"></h2>
-      </div>
+      <button id="backButton">Back</button>
       <div id="panorama"></div>
-      <div id="bubble-container"></div>
     </div>
   </div>
 
   <script>
     let numUnits;
     let unitNames = [];
-    let bubbleData = []; // Each object: { roomLabel, imageFileName, unit }
+    let bubbleData = [];
 
-    /* ---------------- CONFIGURATION FORM LOGIC ---------------- */
+    function saveToStorage() {
+      localStorage.setItem("numUnits", numUnits);
+      localStorage.setItem("unitNames", JSON.stringify(unitNames));
+      localStorage.setItem("bubbleData", JSON.stringify(bubbleData));
+    }
+
+    function loadFromStorage() {
+      numUnits = localStorage.getItem("numUnits") || null;
+      unitNames = JSON.parse(localStorage.getItem("unitNames")) || [];
+      bubbleData = JSON.parse(localStorage.getItem("bubbleData")) || [];
+    }
+
     function showConfigStep(stepNumber) {
       document.querySelectorAll('#configForm .step').forEach((step, index) => {
         step.classList.toggle('active', index === stepNumber - 1);
       });
     }
 
-    // Step 1: Choose number of units
     document.getElementById('next1').addEventListener('click', function() {
       const selection = document.getElementById('numUnitsSelect').value;
       numUnits = (selection === "Villa") ? 1 : parseInt(selection);
@@ -257,96 +104,70 @@
         label.textContent = `Unit ${i + 1} Name:`;
         const input = document.createElement('input');
         input.type = 'text';
-        input.placeholder = (selection === "Villa") ? "Villa" : `Enter name for Unit ${i + 1}`;
-        if (selection === "Villa") input.value = "Villa";
+        input.value = unitNames[i] || (selection === "Villa" ? "Villa" : "");
         input.id = `unitName${i}`;
         container.appendChild(label);
         container.appendChild(input);
       }
+      saveToStorage();
       showConfigStep(2);
     });
 
-    // Step 2: Name the units
+    document.getElementById('back1').addEventListener('click', function() {
+      showConfigStep(1);
+    });
+
     document.getElementById('next2').addEventListener('click', function() {
       unitNames = [];
       for (let i = 0; i < numUnits; i++) {
-        const name = document.getElementById(`unitName${i}`).value.trim();
-        if (!name) {
-          alert(`Please enter a name for Unit ${i + 1}.`);
-          return;
-        }
-        unitNames.push(name);
+        unitNames.push(document.getElementById(`unitName${i}`).value.trim());
       }
-      // Clear previous bubble entries and add one default
       document.getElementById('bubbleEntriesContainer').innerHTML = '';
       addBubbleEntry();
+      saveToStorage();
       showConfigStep(3);
     });
 
-    // Step 3: Add bubble entries
+    document.getElementById('back2').addEventListener('click', function() {
+      showConfigStep(2);
+    });
+
     document.getElementById('addBubble').addEventListener('click', function() {
       addBubbleEntry();
     });
-    
+
     function addBubbleEntry() {
       const container = document.getElementById('bubbleEntriesContainer');
       const entryDiv = document.createElement('div');
       entryDiv.className = 'bubble-entry';
-      
-      const roomLabel = document.createElement('label');
-      roomLabel.textContent = "Room Name (Bubble Label):";
+
       const roomInput = document.createElement('input');
       roomInput.type = 'text';
-      roomInput.placeholder = 'e.g., Living Room';
+      roomInput.placeholder = 'Room Name (Bubble Label)';
       
-      const fileLabel = document.createElement('label');
-      fileLabel.textContent = "360 Image File Name:";
       const fileInput = document.createElement('input');
       fileInput.type = 'text';
-      fileInput.placeholder = 'e.g., hall';
+      fileInput.placeholder = '360 Image File Name';
       
-      const unitLabel = document.createElement('label');
-      unitLabel.textContent = "Select Unit:";
-      const unitSelect = document.createElement('select');
-      unitNames.forEach(unit => {
-        const option = document.createElement('option');
-        option.value = unit;
-        option.textContent = unit;
-        unitSelect.appendChild(option);
-      });
-      
-      entryDiv.appendChild(roomLabel);
       entryDiv.appendChild(roomInput);
-      entryDiv.appendChild(fileLabel);
       entryDiv.appendChild(fileInput);
-      entryDiv.appendChild(unitLabel);
-      entryDiv.appendChild(unitSelect);
-      
       container.appendChild(entryDiv);
     }
-    
-    // Finish Setup: Generate final interface
+
     document.getElementById('finish').addEventListener('click', function() {
       bubbleData = [];
-      const entries = document.querySelectorAll('.bubble-entry');
-      for (const entry of entries) {
-        const inputs = entry.querySelectorAll('input[type="text"]');
-        const roomName = inputs[0].value.trim();
-        const imageFileName = inputs[1].value.trim();
-        const selectedUnit = entry.querySelector('select').value;
-        if (!roomName || !imageFileName || !selectedUnit) {
-          alert("Please complete all bubble entries.");
-          return;
-        }
-        bubbleData.push({ roomLabel: roomName, imageFileName: imageFileName, unit: selectedUnit });
-      }
-      // Hide configuration form and show final interface
-      document.getElementById('configForm').style.display = 'none';
+      document.querySelectorAll('.bubble-entry').forEach(entry => {
+        bubbleData.push({
+          roomLabel: entry.children[0].value.trim(),
+          imageFileName: entry.children[1].value.trim()
+        });
+      });
+      saveToStorage();
       generateFinalInterface();
     });
-    
-    /* ---------------- FINAL INTERFACE LOGIC ---------------- */
+
     function generateFinalInterface() {
+      document.getElementById('configForm').style.display = 'none';
       document.getElementById('finalInterface').style.display = 'block';
       const unitSelectionPage = document.getElementById('unitSelectionPage');
       unitSelectionPage.innerHTML = '';
@@ -354,91 +175,11 @@
         const card = document.createElement('div');
         card.className = 'unit-card';
         card.textContent = unit;
-        card.addEventListener('click', function() {
-          loadWalkthroughForUnit(unit);
-        });
         unitSelectionPage.appendChild(card);
       });
-      document.getElementById('unitSelectionPage').style.display = 'block';
-      document.getElementById('walkthroughPage').style.display = 'none';
     }
-    
-    // Load walkthrough for selected unit
-    function loadWalkthroughForUnit(selectedUnit) {
-      document.getElementById('unitSelectionPage').style.display = 'none';
-      document.getElementById('walkthroughPage').style.display = 'block';
-      document.getElementById('loading-screen').style.display = 'flex';
-      document.getElementById('unitTitle').textContent = selectedUnit + " Walkthrough";
-      
-      // Build scenes object from bubbleData for the selected unit
-      let scenes = {};
-      let bubbleHTML = '';
-      const unitBubbles = bubbleData.filter(b => b.unit === selectedUnit);
-      const firstSceneId = unitBubbles.length > 0 ? sanitizeSceneId(unitBubbles[0].roomLabel) : null;
-      
-      unitBubbles.forEach(bubble => {
-        let sceneId = sanitizeSceneId(bubble.roomLabel);
-        scenes[sceneId] = {
-          type: 'equirectangular',
-          // Assumes the image file is hosted and appends .jpg; adjust as needed.
-          panorama: bubble.imageFileName + '.jpg',
-          hotSpots: []
-        };
-        bubbleHTML += `<div class="bubble-item" data-scene="${sceneId}">
-                         <div class="bubble"><img alt="${bubble.roomLabel} Preview" src="${bubble.imageFileName + '.jpg'}"></div>
-                         <div class="bubble-label">${bubble.roomLabel}</div>
-                       </div>`;
-      });
-      
-      document.getElementById('bubble-container').innerHTML = bubbleHTML;
-      
-      // Initialize Pannellum viewer with the generated scenes
-      pannellum.viewer('panorama', {
-        default: {
-          firstScene: firstSceneId,
-          autoLoad: true,
-          showZoomCtrl: true,
-          minPitch: -120,
-          maxPitch: 120,
-          minYaw: -180,
-          maxYaw: 180,
-          minHfov: 30,
-          maxHfov: 80
-        },
-        scenes: scenes
-      });
-      
-      // Add event listeners for bubble navigation
-      document.querySelectorAll('.bubble-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const sceneId = this.getAttribute('data-scene');
-          if (window.viewer) {
-            window.viewer.loadScene(sceneId);
-          }
-        });
-      });
-      
-      // Simulate loading delay and hide loading screen
-      setTimeout(function() {
-        document.getElementById('loading-screen').style.display = 'none';
-      }, 1000);
-    }
-    
-    // Utility: Sanitize room label to create a valid scene id
-    function sanitizeSceneId(label) {
-      return label.toLowerCase().replace(/\s+/g, '');
-    }
-    
-    // Back button: return to unit selection page
-    document.getElementById('backButton').addEventListener('click', function() {
-      document.getElementById('walkthroughPage').style.display = 'none';
-      document.getElementById('unitSelectionPage').style.display = 'block';
-      document.getElementById('loading-screen').style.display = 'flex';
-    });
-    
-    /* ---------------- DOWNLOAD CODE FUNCTIONALITY ---------------- */
+
     document.getElementById('downloadCode').addEventListener('click', function() {
-      // Grab the entire HTML source of the current document
       var code = document.documentElement.outerHTML;
       var blob = new Blob([code], { type: 'text/html' });
       var url = URL.createObjectURL(blob);
@@ -448,6 +189,9 @@
       a.click();
       URL.revokeObjectURL(url);
     });
+
+    loadFromStorage();
   </script>
+
 </body>
 </html>
